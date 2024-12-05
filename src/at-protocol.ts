@@ -1,14 +1,22 @@
 export namespace ATProtocol {
     export type NSID = `${string}.${string}` | `${string}.${string}.*`;
 
+    export type DID = DidWeb | DidPlc;
+    export type DidWeb = `did:web:${string}`;
+    export type DidPlc = `did:plc:${string}`;
+
     export namespace Jetstream {
         export type Event =
             | IdentityEvent
             | AccountEvent
-            | CreateCommitEvent
-            | UpdateCommitEvent
-            | DeleteCommitEvent;
+            | CreateEvent
+            | UpdateEvent
+            | DeleteEvent;
 
+        /**
+         * An Identity update for a DID which indicates that you may want to
+         * purge an identity cache and revalidate the DID doc and handle.
+         */
         export interface IdentityEvent {
             did: string;
             time_us: number;
@@ -16,6 +24,10 @@ export namespace ATProtocol {
             identity: Identity;
         }
 
+        /**
+         * An Account event that indicates a change in account status i.e. from
+         * active to deactivated, or to `takendown` if the PDS has taken down the repo.
+         */
         export interface AccountEvent {
             did: string;
             time_us: number;
@@ -23,29 +35,38 @@ export namespace ATProtocol {
             account: Account;
         }
 
-        export interface CreateCommitEvent {
+        /**
+         * Create a new record with the contents provided.
+         */
+        export interface CreateEvent {
             did: string;
             time_us: number;
             kind: 'commit';
-            commit: Create;
+            commit: CreateCommit;
         }
 
-        export interface UpdateCommitEvent {
+        /**
+         * Update an existing record and replace it with the contents provided.
+         */
+        export interface UpdateEvent {
             did: string;
             time_us: number;
             kind: 'commit';
-            commit: Update;
+            commit: UpdateCommit;
         }
 
-        export interface DeleteCommitEvent {
+        /**
+         * Delete an existing record with the DID, Collection, and Record Key provided.
+         */
+        export interface DeleteEvent {
             did: string;
             time_us: number;
             kind: 'commit';
-            commit: Delete;
+            commit: DeleteCommit;
         }
     }
 
-    export interface Create<R = Record<string, unknown>> {
+    export interface CreateCommit<R = Record<string, unknown>> {
         rev: string;
         operation: 'create';
         collection: string;
@@ -55,7 +76,7 @@ export namespace ATProtocol {
         record: R;
     }
 
-    export interface Update<R = Record<string, unknown>> {
+    export interface UpdateCommit<R = Record<string, unknown>> {
         rev: string;
         operation: 'update';
         collection: string;
@@ -65,7 +86,7 @@ export namespace ATProtocol {
         record: R;
     }
 
-    export interface Delete {
+    export interface DeleteCommit {
         rev: string;
         operation: 'delete';
         collection: string;

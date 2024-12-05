@@ -1,8 +1,8 @@
-type EventMapType = {
+type Events = {
     [key: string]: Event;
 };
 
-export class GenericEventTarget<EventMap extends EventMapType> extends EventTarget {
+export class EventDispatcher<EventMap extends Events> extends EventTarget {
     /* @ts-ignore */
     override addEventListener<Key extends keyof EventMap & string>(
         type: Key,
